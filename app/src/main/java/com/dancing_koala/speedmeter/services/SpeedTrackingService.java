@@ -5,8 +5,8 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -21,7 +21,7 @@ public class SpeedTrackingService extends Service implements com.google.android.
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     /**
-     *
+     * Key to get the speed from extras
      */
     public static final String EXTRA_SPEED = "com.dancing_koala.speedmeter.extra_speed";
     /**
@@ -38,24 +38,47 @@ public class SpeedTrackingService extends Service implements com.google.android.
      */
     private static final int ACCURACY_DELTA_MAX = 200;
     /**
-     * Fastest time interval for location updates (2 seconds)
+     * Maximum stop duration before ending the tracking
      */
-    private static final int TIME_INTERVAL_FASTEST = 1000 * 1;
+    private static final int STOP_MOVING_DELAY = 1000 * 2;// 2 seconds
     /**
-     * Base time interval for location updates (5 seconds)
+     * Fastest time interval for location updates
      */
-    private static final int TIME_INTERVAL_BASE = 1000 * 3;
+    private static final int TIME_INTERVAL_FASTEST = 1000;// 1 second
     /**
-     * Max time delta between location updates (2 minutes).
+     * Base time interval for location updates
+     */
+    private static final int TIME_INTERVAL_BASE = 1000 * 3;// 3 seconds
+    /**
+     * Max time delta between location updates.
      * Larger time delta means the update is too old.
      */
-    private static final int TIME_DELTA_MAX = 1000 * 60 * 2;
+    private static final int TIME_DELTA_MAX = 1000 * 60 * 2;// 2 minutes
 
+    /**
+     * Determines whether the trip started or not
+     */
+    private boolean tripStarted;
+    /**
+     * Determines whether the trip started or not
+     */
+    private boolean serviceAboutToEnd;
     /**
      * Google API client used for requesting location updates
      */
     private GoogleApiClient mGoogleApiClient;
+    /**
+     * Handler used for launching delayed actions
+     */
+    private Handler handler;
+    /**
+     * Last location saved
+     */
     private Location lastLocation;
+    /**
+     * Runnable to stop the service itself
+     */
+    private StopSelfRunnable stopSelfRunnable;
 
     /**
      * Constructor
@@ -68,6 +91,10 @@ public class SpeedTrackingService extends Service implements com.google.android.
         super.onCreate();
         Log.i("devel", "SpeedTrackingService started.");
 
+        tripStarted = false;
+        handler = new Handler();
+        stopSelfRunnable = new StopSelfRunnable();
+
         buildGoogleApiClient();
         mGoogleApiClient.connect();
     }
@@ -78,8 +105,8 @@ public class SpeedTrackingService extends Service implements com.google.android.
 
         if (mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
 
-        Intent stopMovingIntent = new Intent(INTENT_ACTION_STOP_MOVING);
-        sendBroadcast(stopMovingIntent);
+        // Notifying all receivers about the service ending
+        sendBroadcast(new Intent(INTENT_ACTION_STOP_MOVING));
 
         super.onDestroy();
     }
@@ -114,7 +141,25 @@ public class SpeedTrackingService extends Service implements com.google.android.
     public void onLocationChanged(Location location) {
         if (isBetterLocation(location, lastLocation)) {
             if (lastLocation != null) {
-                float speed = calculateSpeed(lastLocation, location) * 3600 / 1000;
+                float speed = calculateSpeed(lastLocation, location);
+
+                // The trip starts as soon as the speed is greater than 0
+                if (speed > 0 && !tripStarted) {
+                    tripStarted = true;
+                }
+
+                if (tripStarted) {
+                    // If the speed goes below 1m / s, the movement is considered as stopping
+                    if (speed < 1f && !serviceAboutToEnd) {
+                        handler.postDelayed(stopSelfRunnable, STOP_MOVING_DELAY);
+                        serviceAboutToEnd = true;
+                    } else if (speed >= 1f && serviceAboutToEnd) {
+                        handler.removeCallbacks(stopSelfRunnable);
+                        serviceAboutToEnd = false;
+                    }
+                }
+
+                // Notify receivers about speed updates
                 Intent speedUpdateIntent = new Intent(INTENT_ACTION_SPEED_UPDATE);
                 speedUpdateIntent.putExtra(EXTRA_SPEED, speed);
                 sendBroadcast(speedUpdateIntent);
@@ -124,6 +169,9 @@ public class SpeedTrackingService extends Service implements com.google.android.
         }
     }
 
+    /**
+     * Initializes the GoogleApiClient
+     */
     private synchronized void buildGoogleApiClient() {
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addConnectionCallbacks(this)
@@ -132,6 +180,9 @@ public class SpeedTrackingService extends Service implements com.google.android.
                 .build();
     }
 
+    /**
+     * Starts the location updates
+     */
     private void startLocationUpdates() {
         LocationRequest locationRequest = new LocationRequest();
         locationRequest.setInterval(TIME_INTERVAL_BASE);
@@ -141,14 +192,26 @@ public class SpeedTrackingService extends Service implements com.google.android.
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
     }
 
+    /**
+     * Stop the location updates
+     */
     private void stopLocationUpdates() {
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
+    /**
+     * Determines whether a location is better than an older one or not
+     *
+     * @param location            the newer location
+     * @param currentBestLocation the older location
+     * @return True if the newer location is the better one.
+     */
     private boolean isBetterLocation(Location location, Location currentBestLocation) {
         if (currentBestLocation == null) return true;
 
         long timeDelta = location.getTime() - currentBestLocation.getTime();
+
+        // Determining the time delta based conditions
         boolean isNewerEnough = timeDelta > TIME_DELTA_MAX;
         boolean isTooOld = timeDelta < -TIME_DELTA_MAX;
         boolean isNewer = timeDelta > 0;
@@ -161,6 +224,7 @@ public class SpeedTrackingService extends Service implements com.google.android.
 
         int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
 
+        // Determining the accuracy delta based conditions
         boolean isLessAccurate = accuracyDelta > 0;
         boolean isMoreAccurate = accuracyDelta < 0;
         boolean isSignificantlyLessAccurate = accuracyDelta > ACCURACY_DELTA_MAX;
@@ -195,8 +259,20 @@ public class SpeedTrackingService extends Service implements com.google.android.
      * @return The speed in meters per second
      */
     private float calculateSpeed(Location oldLocation, Location newLocation) {
+        // Time delta in milliseconds
         long timeDelta = newLocation.getTime() - oldLocation.getTime();
+        // Distance between the locations in meters
         float distanceGap = newLocation.distanceTo(oldLocation);
         return Math.round(distanceGap / (timeDelta / 1000));
+    }
+
+    /**
+     * Runnable that stops the service itself
+     */
+    private class StopSelfRunnable implements Runnable {
+        @Override
+        public void run() {
+            stopSelf();
+        }
     }
 }

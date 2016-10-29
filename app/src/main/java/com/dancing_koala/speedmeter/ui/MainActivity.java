@@ -48,8 +48,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (receiver != null)
+        if (receiver != null) {
             registerReceiver(receiver, new IntentFilter(SpeedTrackingService.INTENT_ACTION_SPEED_UPDATE));
+            registerReceiver(receiver, new IntentFilter(SpeedTrackingService.INTENT_ACTION_STOP_MOVING));
+        }
     }
 
     @Override
@@ -64,9 +66,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.d("devel", "SpeedTrackingBroadcastReceiver.onReceive ::  " + intent.getAction());
+            String action = intent.getAction();
 
-            if (intent.getAction().equals(SpeedTrackingService.INTENT_ACTION_SPEED_UPDATE)) {
-                speedTextView.setText("" + intent.getFloatExtra(SpeedTrackingService.EXTRA_SPEED, 0f));
+            switch (action) {
+                case SpeedTrackingService.INTENT_ACTION_SPEED_UPDATE:
+                    speedTextView.setText("" + intent.getFloatExtra(SpeedTrackingService.EXTRA_SPEED, 0f));
+                    break;
+
+                case SpeedTrackingService.INTENT_ACTION_STOP_MOVING:
+                    speedTextView.setText("Stop");
+                    break;
             }
         }
     }
