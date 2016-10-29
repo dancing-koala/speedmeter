@@ -17,8 +17,21 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-public class LocationService extends Service implements com.google.android.gms.location.LocationListener,
+public class SpeedTrackingService extends Service implements com.google.android.gms.location.LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
+    /**
+     *
+     */
+    public static final String EXTRA_SPEED = "com.dancing_koala.speedmeter.extra_speed";
+    /**
+     * Action intent sent on to notify speed update
+     */
+    public static final String INTENT_ACTION_SPEED_UPDATE = "com.dancing_koala.speedmeter.speed_update";
+    /**
+     * Action intent sent on to notify that the device stopped moving
+     */
+    public static final String INTENT_ACTION_STOP_MOVING = "com.dancing_koala.speedmeter.stop_moving";
 
     /**
      * Max accuracy delta in meters
@@ -27,11 +40,11 @@ public class LocationService extends Service implements com.google.android.gms.l
     /**
      * Fastest time interval for location updates (2 seconds)
      */
-    private static final int TIME_INTERVAL_FASTEST = 1000 * 2;
+    private static final int TIME_INTERVAL_FASTEST = 1000 * 1;
     /**
      * Base time interval for location updates (5 seconds)
      */
-    private static final int TIME_INTERVAL_BASE = 1000 * 5;
+    private static final int TIME_INTERVAL_BASE = 1000 * 3;
     /**
      * Max time delta between location updates (2 minutes).
      * Larger time delta means the update is too old.
@@ -47,19 +60,13 @@ public class LocationService extends Service implements com.google.android.gms.l
     /**
      * Constructor
      */
-    public LocationService() {
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("devel", "LocationService.onStartCommand ::  ");
-        return super.onStartCommand(intent, flags, startId);
+    public SpeedTrackingService() {
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i("devel", "LocationService.onCreate");
+        Log.i("devel", "SpeedTrackingService started.");
 
         buildGoogleApiClient();
         mGoogleApiClient.connect();
@@ -67,9 +74,12 @@ public class LocationService extends Service implements com.google.android.gms.l
 
     @Override
     public void onDestroy() {
-        Log.i("devel", "LocationService.onDestroy");
+        Log.i("devel", "SpeedTrackingService stopped.");
 
         if (mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
+
+        Intent stopMovingIntent = new Intent(INTENT_ACTION_STOP_MOVING);
+        sendBroadcast(stopMovingIntent);
 
         super.onDestroy();
     }
@@ -105,7 +115,9 @@ public class LocationService extends Service implements com.google.android.gms.l
         if (isBetterLocation(location, lastLocation)) {
             if (lastLocation != null) {
                 float speed = calculateSpeed(lastLocation, location) * 3600 / 1000;
-                Log.d("devel", "LocationService.onLocationChanged ::  " + speed);
+                Intent speedUpdateIntent = new Intent(INTENT_ACTION_SPEED_UPDATE);
+                speedUpdateIntent.putExtra(EXTRA_SPEED, speed);
+                sendBroadcast(speedUpdateIntent);
             }
 
             lastLocation = location;
@@ -185,9 +197,6 @@ public class LocationService extends Service implements com.google.android.gms.l
     private float calculateSpeed(Location oldLocation, Location newLocation) {
         long timeDelta = newLocation.getTime() - oldLocation.getTime();
         float distanceGap = newLocation.distanceTo(oldLocation);
-
-        Log.d("devel", "LocationService.calculateSpeed :: " + timeDelta + " , " + distanceGap);
-
         return Math.round(distanceGap / (timeDelta / 1000));
     }
 }

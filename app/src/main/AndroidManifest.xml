@@ -19,7 +19,7 @@
         </activity>
 
         <service
-            android:name=".services.LocationService"
+            android:name=".services.SpeedTrackingService"
             android:exported="false" />
     </application>
 
