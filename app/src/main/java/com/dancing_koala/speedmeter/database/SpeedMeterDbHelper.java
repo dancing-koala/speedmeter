@@ -74,12 +74,12 @@ public class SpeedMeterDbHelper extends SQLiteOpenHelper {
     /**
      * Tracking section table schema
      */
-    private static class TrackingSectionEntry {
-        static final String TABLE_NAME = "tracking_section";
-        static final String COLUMN_NAME_ID = "id";
-        static final String COLUMN_NAME_START_TIME = "start_time";
-        static final String COLUMN_NAME_END_TIME = "end_time";
-        static final String COLUMN_NAME_DISTANCE = "distance";
-        static final String COLUMN_NAME_AVERAGE_SPEED = "average_speed";
+    public static class TrackingSectionEntry {
+        public static final String TABLE_NAME = "tracking_section";
+        public static final String COLUMN_NAME_ID = "id";
+        public static final String COLUMN_NAME_START_TIME = "start_time";
+        public static final String COLUMN_NAME_END_TIME = "end_time";
+        public static final String COLUMN_NAME_DISTANCE = "distance";
+        public static final String COLUMN_NAME_AVERAGE_SPEED = "average_speed";
     }
 }

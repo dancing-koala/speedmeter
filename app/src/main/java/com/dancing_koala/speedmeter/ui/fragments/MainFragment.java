@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.dancing_koala.speedmeter.R;
 import com.dancing_koala.speedmeter.database.SpeedMeterDbHelper;
+import com.dancing_koala.speedmeter.database.access.TrackingSectionAccess;
 import com.dancing_koala.speedmeter.models.TrackingSection;
 import com.dancing_koala.speedmeter.services.SpeedTrackingService;
 import com.dancing_koala.speedmeter.ui.views.SpeedMeterView;
@@ -76,7 +77,10 @@ public class MainFragment extends Fragment {
         speedMeterView = (SpeedMeterView) rootView.findViewById(R.id.smv_speedmeterview);
         receiver = new SpeedTrackingBroadcastReceiver();
 
-        SpeedMeterDbHelper.getDeleteEntriesSQL();
+        TrackingSectionAccess access = new TrackingSectionAccess(getActivity());
+        access.openToRead();
+        access.getLastTrackingSection();
+        access.close();
     }
 
     private class SpeedTrackingBroadcastReceiver extends BroadcastReceiver {
