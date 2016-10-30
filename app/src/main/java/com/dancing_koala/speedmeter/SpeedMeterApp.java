@@ -7,7 +7,7 @@ import com.tsengvn.typekit.Typekit;
 /**
  * SpeedMeter application class
  */
-public class SpeedmeterApp extends Application {
+public class SpeedMeterApp extends Application {
 
     @Override
     public void onCreate() {

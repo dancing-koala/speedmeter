@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.dancing_koala.speedmeter.R;
+import com.dancing_koala.speedmeter.database.SpeedMeterDbHelper;
+import com.dancing_koala.speedmeter.models.TrackingSection;
 import com.dancing_koala.speedmeter.services.SpeedTrackingService;
 import com.dancing_koala.speedmeter.ui.views.SpeedMeterView;
 
@@ -74,7 +76,7 @@ public class MainFragment extends Fragment {
         speedMeterView = (SpeedMeterView) rootView.findViewById(R.id.smv_speedmeterview);
         receiver = new SpeedTrackingBroadcastReceiver();
 
-
+        SpeedMeterDbHelper.getDeleteEntriesSQL();
     }
 
     private class SpeedTrackingBroadcastReceiver extends BroadcastReceiver {
@@ -86,7 +88,7 @@ public class MainFragment extends Fragment {
             switch (action) {
                 case SpeedTrackingService.INTENT_ACTION_SPEED_UPDATE:
                     float speed = intent.getFloatExtra(SpeedTrackingService.EXTRA_SPEED, 0f) * 3600 / 1000;
-                    speedTextView.setText(String.format(Locale.FRANCE, "%f", speed));
+                    speedTextView.setText(String.format(Locale.FRANCE, "%.01f", speed));
                     speedMeterView.setSpeed(speed);
                     break;
 
