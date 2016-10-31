@@ -13,7 +13,7 @@ import com.tsengvn.typekit.TypekitContextWrapper;
 /**
  * Main activity of the application
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends BaseActivity {
     /**
      * Fragment displayed by the main activity
      */
@@ -31,11 +31,6 @@ public class MainActivity extends AppCompatActivity {
                 .add(R.id.fragment_container, mainFragment)
                 .commitAllowingStateLoss();
 
-    }
-
-    @Override
-    protected void attachBaseContext(Context newBase) {
-        super.attachBaseContext(TypekitContextWrapper.wrap(newBase));
     }
 
     @Override

@@ -164,6 +164,7 @@ public class MainFragment extends Fragment {
 
                     Intent summmaryIntent = new Intent(getActivity(), SummaryActivity.class);
                     summmaryIntent.putExtra(SummaryActivity.EXTRA_SESSION_ID, intent.getStringExtra(SpeedTrackingService.EXTRA_SESSION_ID));
+                    startActivity(summmaryIntent);
                     break;
             }
         }

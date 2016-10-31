@@ -1,6 +1,5 @@
 package com.dancing_koala.speedmeter.ui.activities;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.dancing_koala.speedmeter.R;
@@ -9,7 +8,7 @@ import com.dancing_koala.speedmeter.ui.fragments.SummaryFragment;
 /**
  * Tracking session summary activity
  */
-public class SummaryActivity extends AppCompatActivity {
+public class SummaryActivity extends BaseActivity {
 
     /**
      * Key to get the session id from extras

@@ -60,7 +60,7 @@ public class TrackingSessionAccess extends DatabaseAccess {
                 + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_DISTANCE + ", "
                 + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_AVERAGE_SPEED
                 + " FROM " + SpeedMeterDbHelper.TrackingSessionEntry.TABLE_NAME
-                + " WHERE " + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_ID + " = " + id + " "
+                + " WHERE " + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_ID + " = \"" + id + "\" "
                 + " ORDER BY  " + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_START_TIME + " DESC "
                 + " LIMIT 1 ;";
 

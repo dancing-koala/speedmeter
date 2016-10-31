@@ -18,20 +18,24 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".ui.activities.MainActivity"
-            android:launchMode="singleTask"
-            android:windowSoftInputMode="adjustResize">
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
+            <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.activities.SummaryActivity"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait"/>
 
         <service
             android:name=".services.SpeedTrackingService"
             android:exported="false" />
 
-        <activity android:name=".ui.activities.SummaryActivity"></activity>
     </application>
 
 </manifest>

@@ -11,8 +11,15 @@ import android.widget.TextView;
 
 import com.dancing_koala.speedmeter.R;
 import com.dancing_koala.speedmeter.database.access.TrackingSessionAccess;
+import com.dancing_koala.speedmeter.helpers.Formatter;
 import com.dancing_koala.speedmeter.models.TrackingSession;
 import com.dancing_koala.speedmeter.ui.activities.SummaryActivity;
+
+import java.text.DateFormat;
+import java.text.Normalizer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Tracking session summary fragment
@@ -51,12 +58,13 @@ public class SummaryFragment extends Fragment {
             return;
         }
 
+        DateFormat dateFormat = new SimpleDateFormat("kk:mm:ss", Locale.FRANCE);
 
-        ((TextView) rootView.findViewById(R.id.txtv_session_start)).setText("" + session.getStartTime());
-        ((TextView) rootView.findViewById(R.id.txtv_session_end)).setText("" + session.getEndTime());
-        ((TextView) rootView.findViewById(R.id.txtv_session_duration)).setText("" + (session.getEndTime() - session.getStartTime()));
-        ((TextView) rootView.findViewById(R.id.txtv_session_distance)).setText("" + session.getDistance());
-        ((TextView) rootView.findViewById(R.id.txtv_session_speed)).setText("" + session.getAverageSpeed());
+        ((TextView) rootView.findViewById(R.id.txtv_session_start)).setText(dateFormat.format(new Date(session.getStartTime())));
+        ((TextView) rootView.findViewById(R.id.txtv_session_end)).setText(dateFormat.format(new Date(session.getEndTime())));
+        ((TextView) rootView.findViewById(R.id.txtv_session_duration)).setText(Formatter.getFormattedTime(session.getEndTime() - session.getStartTime()));
+        ((TextView) rootView.findViewById(R.id.txtv_session_distance)).setText(Formatter.getFormattedDistance(session.getDistance()));
+        ((TextView) rootView.findViewById(R.id.txtv_session_speed)).setText(Formatter.getKilometersPerHour(session.getAverageSpeed()));
 
     }
 }
