@@ -152,6 +152,7 @@ public class SpeedTrackingService extends Service implements com.google.android.
 
     @Override
     public void onLocationChanged(Location location) {
+        Log.d("devel", "SpeedTrackingService.onLocationChanged ::  ");
         if (isBetterLocation(location, lastLocation)) {
             if (lastLocation != null) {
                 float speed = calculateSpeed(lastLocation, location);

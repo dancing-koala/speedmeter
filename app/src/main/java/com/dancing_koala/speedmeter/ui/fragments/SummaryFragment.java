@@ -1,6 +1,5 @@
 package com.dancing_koala.speedmeter.ui.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,7 +15,6 @@ import com.dancing_koala.speedmeter.models.TrackingSession;
 import com.dancing_koala.speedmeter.ui.activities.SummaryActivity;
 
 import java.text.DateFormat;
-import java.text.Normalizer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -26,7 +24,7 @@ import java.util.Locale;
  */
 public class SummaryFragment extends Fragment {
 
-    private View rootView;
+    private View mRootView;
 
     public SummaryFragment() {
     }
@@ -34,9 +32,9 @@ public class SummaryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        rootView = inflater.inflate(R.layout.fragment_summary, container, false);
+        mRootView = inflater.inflate(R.layout.fragment_summary, container, false);
         init();
-        return rootView;
+        return mRootView;
     }
 
     private void init() {
@@ -60,11 +58,11 @@ public class SummaryFragment extends Fragment {
 
         DateFormat dateFormat = new SimpleDateFormat("kk:mm:ss", Locale.FRANCE);
 
-        ((TextView) rootView.findViewById(R.id.txtv_session_start)).setText(dateFormat.format(new Date(session.getStartTime())));
-        ((TextView) rootView.findViewById(R.id.txtv_session_end)).setText(dateFormat.format(new Date(session.getEndTime())));
-        ((TextView) rootView.findViewById(R.id.txtv_session_duration)).setText(Formatter.getFormattedTime(session.getEndTime() - session.getStartTime()));
-        ((TextView) rootView.findViewById(R.id.txtv_session_distance)).setText(Formatter.getFormattedDistance(session.getDistance()));
-        ((TextView) rootView.findViewById(R.id.txtv_session_speed)).setText(Formatter.getKilometersPerHour(session.getAverageSpeed()));
+        ((TextView) mRootView.findViewById(R.id.txtv_session_start)).setText(dateFormat.format(new Date(session.getStartTime())));
+        ((TextView) mRootView.findViewById(R.id.txtv_session_end)).setText(dateFormat.format(new Date(session.getEndTime())));
+        ((TextView) mRootView.findViewById(R.id.txtv_session_duration)).setText(Formatter.getFormattedTime(session.getEndTime() - session.getStartTime()));
+        ((TextView) mRootView.findViewById(R.id.txtv_session_distance)).setText(Formatter.getFormattedDistance(session.getDistance()));
+        ((TextView) mRootView.findViewById(R.id.txtv_session_speed)).setText(Formatter.getKilometersPerHour(session.getAverageSpeed()));
 
     }
 }

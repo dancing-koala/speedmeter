@@ -8,10 +8,9 @@
 
     <com.dancing_koala.speedmeter.ui.views.SpeedMeterView
         android:id="@+id/smv_speedmeterview"
-        android:background="@color/colorPrimaryDark"
-        android:layout_centerInParent="true"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:layout_centerInParent="true" />
 
     <Button
         android:id="@+id/btn_start_tracking"
@@ -20,22 +19,39 @@
         android:text="Start" />
 
     <Button
-        android:layout_below="@+id/btn_start_tracking"
         android:id="@+id/btn_stop_tracking"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/btn_start_tracking"
         android:text="Stop" />
 
     <TextView
-        android:layout_alignParentRight="true"
         android:id="@+id/txtv_speed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@android:color/white"
+        android:layout_alignParentRight="true"
         android:text="54.4 km/h"
+        android:textColor="@android:color/white"
         android:textSize="28sp"
         app:font="Custom1" />
 
+
+    <Button
+        android:id="@+id/btn_start_speed_test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:text="Start Speed Test" />
+
+    <Button
+        android:id="@+id/btn_stop_speed_test"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+
+        android:layout_toRightOf="@+id/btn_start_speed_test"
+        android:text="Stop Speed Test" />
 
 
 </RelativeLayout>

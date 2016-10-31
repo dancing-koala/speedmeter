@@ -9,8 +9,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Point;
-import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -24,6 +22,9 @@ public class SpeedMeterView extends View {
     private static final int DEFAULT_BG_COLOR = Color.parseColor("#252525");
     private static final int DEFAULT_NEEDLE_COLOR = Color.parseColor("#FF8800");
 
+    private static final float DEFAULT_MAX_SPEED = 180f;
+    private static final float DEFAULT_INITIAL_ANGLE = -45f;
+    private static final float DEFAULT_MAX_ROTATION_ANGLE = 270f;
 
     private Bitmap mCacheBitmap;
     private Canvas mCacheCanvas;
@@ -34,11 +35,10 @@ public class SpeedMeterView extends View {
     private float mSpeed;
     private int mHeight;
     private int mWidth;
-    private Matrix matrix;
+    private Matrix mMatrix;
     private Paint mNeedlePaint;
     private Paint mBgPaint;
     private Path mNeedlePath;
-    private RectF mViewBounds;
     private ValueAnimator angleAnim;
 
     public SpeedMeterView(Context context) {
@@ -73,67 +73,66 @@ public class SpeedMeterView extends View {
         mBgPaint.setColor(DEFAULT_OUTER_RING_COLOR);
 
         mNeedlePath = new Path();
-        matrix = new Matrix();
-        mCurrentAngle = -0f;
-
+        mMatrix = new Matrix();
+        mCurrentAngle = 0f;
         mCacheCanvas = new Canvas();
-        mViewBounds = new RectF();
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
-        mWidth = MeasureSpec.getSize(widthMeasureSpec);
-        mHeight = MeasureSpec.getSize(heightMeasureSpec);
-        mRadius = Math.min(mWidth, mHeight) / 2f;
+        if (mWidth != MeasureSpec.getSize(widthMeasureSpec) || mHeight != MeasureSpec.getSize(heightMeasureSpec)) {
 
-        mViewBounds.left = getLeft();
-        mViewBounds.right = getRight();
-        mViewBounds.top = getTop();
-        mViewBounds.bottom = getBottom();
+            mWidth = MeasureSpec.getSize(widthMeasureSpec);
+            mHeight = MeasureSpec.getSize(heightMeasureSpec);
+            mRadius = Math.min(mWidth, mHeight) / 2f;
 
-        mCenterX = mViewBounds.centerX();
-        mCenterY = mViewBounds.centerY();
+            mCenterX = mWidth / 2f;
+            mCenterY = mHeight / 2f;
 
-        mCacheBitmap = null;
+            mCacheBitmap = null;
 
-        mNeedlePath.reset();
-        mNeedlePath.moveTo(mCenterX, mCenterY);
-        mNeedlePath.lineTo(mCenterX - mRadius, mCenterY);
+            mNeedlePath.reset();
+            mNeedlePath.moveTo(mCenterX, mCenterY);
+            mNeedlePath.lineTo(mCenterX - mRadius, mCenterY);
 
-        matrix.setRotate(-45f, mCenterX, mCenterY);
-        mNeedlePath.transform(matrix);
+            mMatrix.setRotate(DEFAULT_INITIAL_ANGLE, mCenterX, mCenterY);
+            mNeedlePath.transform(mMatrix);
 
-        setMeasuredDimension(mWidth, mHeight);
+            setMeasuredDimension(mWidth, mHeight);
+        }
     }
-
 
     @Override
     protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
         if (mCacheBitmap == null) {
             mCacheBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
             mCacheCanvas.setBitmap(mCacheBitmap);
+
             mBgPaint.setColor(DEFAULT_OUTER_RING_COLOR);
             mCacheCanvas.drawCircle(mCenterX, mCenterY, mRadius, mBgPaint);
             mBgPaint.setColor(DEFAULT_BG_COLOR);
             mCacheCanvas.drawCircle(mCenterX, mCenterY, mRadius - 12, mBgPaint);
+
+            mNeedlePaint.setStyle(Paint.Style.STROKE);
+            mCacheCanvas.drawCircle(mCenterX, mCenterY, 10, mNeedlePaint);
         }
 
+        super.onDraw(canvas);
         canvas.drawBitmap(mCacheBitmap, 0, 0, mBgPaint);
-
         canvas.drawPath(mNeedlePath, mNeedlePaint);
     }
 
     public void setSpeed(float speed) {
-        this.mSpeed = speed;
+        mSpeed = (speed > DEFAULT_MAX_SPEED) ? DEFAULT_MAX_SPEED : speed;
 
-        final float rotation = (speed * 3 / 2) - mCurrentAngle;
+        final float rotation = (mSpeed * DEFAULT_MAX_ROTATION_ANGLE / DEFAULT_MAX_SPEED) - mCurrentAngle;
+
+        mCurrentAngle += rotation;
 
         angleAnim = ValueAnimator.ofFloat(0, rotation);
-
-        angleAnim.setDuration(500);
+        angleAnim.setDuration(600);
         angleAnim.setInterpolator(new OvershootInterpolator());
         angleAnim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
 
@@ -141,24 +140,13 @@ public class SpeedMeterView extends View {
 
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                matrix.setRotate(((float) animation.getAnimatedValue() - lastAnimatedValue), mCenterX, mCenterY);
+                mMatrix.setRotate(((float) animation.getAnimatedValue() - lastAnimatedValue), mCenterX, mCenterY);
                 lastAnimatedValue = (float) animation.getAnimatedValue();
-                mNeedlePath.transform(matrix);
+                mNeedlePath.transform(mMatrix);
                 invalidate();
             }
         });
 
-        mCurrentAngle = mCurrentAngle + rotation;
-
         angleAnim.start();
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            setSpeed(mSpeed + 30);
-        }
-
-        return true;
     }
 }
