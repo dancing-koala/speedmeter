@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">SpeedMeter</string>
+
+    <string name="understood">J\'ai compris</string>
+
+    <string name="location_explanation_title">Permission de localisation</string>
+    <string name="location_explanation_msg">
+        Tous les calculs de vitesse effectués par l\'application se basent sur les données
+        récupérées par le GPS de votre appareil. C\'est pourquoi vous devez autoriser l\'application
+        à utiliser le GPS.
+    </string>
 </resources>

@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.dancing_koala.speedmeter.helpers.Tracker;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
@@ -143,6 +144,9 @@ public class SpeedTrackingService extends Service implements com.google.android.
             if (lastLocation != null) {
                 float speed = calculateSpeed(lastLocation, location);
 
+                Tracker.addDistance(location.distanceTo(lastLocation));
+                Tracker.addSpeed(speed);
+
                 // The trip starts as soon as the speed is greater than 0
                 if (speed > 0 && !tripStarted) {
                     tripStarted = true;
@@ -184,19 +188,28 @@ public class SpeedTrackingService extends Service implements com.google.android.
      * Starts the location updates
      */
     private void startLocationUpdates() {
+        // Building the location request
         LocationRequest locationRequest = new LocationRequest();
         locationRequest.setInterval(TIME_INTERVAL_BASE);
         locationRequest.setFastestInterval(TIME_INTERVAL_FASTEST);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+        // Requesting location updates
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
+
+        // Starting a new tracking session
+        Tracker.initializeSession(this);
     }
 
     /**
      * Stop the location updates
      */
     private void stopLocationUpdates() {
+        // Stopping location updates
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+
+        // Ending and saving the current tracking session
+        Tracker.finalizeSession();
     }
 
     /**

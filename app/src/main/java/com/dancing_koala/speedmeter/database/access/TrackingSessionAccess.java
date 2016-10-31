@@ -47,6 +47,36 @@ public class TrackingSessionAccess extends DatabaseAccess {
     }
 
     /**
+     * Gets the last tracking session recorded
+     *
+     * @return The last tracking session model
+     */
+    public TrackingSession getTrackingSessionById(String id) {
+
+        String query = "SELECT "
+                + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_ID + ", "
+                + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_START_TIME + ", "
+                + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_END_TIME + ", "
+                + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_DISTANCE + ", "
+                + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_AVERAGE_SPEED
+                + " FROM " + SpeedMeterDbHelper.TrackingSessionEntry.TABLE_NAME
+                + " WHERE " + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_ID + " = " + id + " "
+                + " ORDER BY  " + SpeedMeterDbHelper.TrackingSessionEntry.COLUMN_NAME_START_TIME + " DESC "
+                + " LIMIT 1 ;";
+
+        TrackingSession session = null;
+        Cursor c = db.rawQuery(query, null);
+
+        if (c.moveToFirst()) {
+            session = cursorToTrackingSession(c);
+        }
+
+        c.close();
+
+        return session;
+    }
+
+    /**
      * Saves a tracking session model into the database
      *
      * @param mSession Tracking session model to save
