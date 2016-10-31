@@ -23,6 +23,7 @@ import com.dancing_koala.speedmeter.helpers.PermissionHelper;
 import com.dancing_koala.speedmeter.helpers.Tracker;
 import com.dancing_koala.speedmeter.models.TrackingSession;
 import com.dancing_koala.speedmeter.services.SpeedTrackingService;
+import com.dancing_koala.speedmeter.ui.activities.SummaryActivity;
 import com.dancing_koala.speedmeter.ui.views.SpeedMeterView;
 
 import java.util.Locale;
@@ -51,7 +52,7 @@ public class MainFragment extends Fragment {
     /**
      * Constructor
      */
-    public MainFragment(){
+    public MainFragment() {
     }
 
     @Nullable
@@ -159,6 +160,10 @@ public class MainFragment extends Fragment {
 
                 case SpeedTrackingService.INTENT_ACTION_STOP_MOVING:
                     speedTextView.setText("Stop");
+                    speedMeterView.setSpeed(0f);
+
+                    Intent summmaryIntent = new Intent(getActivity(), SummaryActivity.class);
+                    summmaryIntent.putExtra(SummaryActivity.EXTRA_SESSION_ID, intent.getStringExtra(SpeedTrackingService.EXTRA_SESSION_ID));
                     break;
             }
         }
