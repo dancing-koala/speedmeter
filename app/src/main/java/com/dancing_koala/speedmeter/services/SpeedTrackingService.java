@@ -13,6 +13,7 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.dancing_koala.speedmeter.helpers.Tracker;
+import com.dancing_koala.speedmeter.models.TrackingSession;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
@@ -24,15 +25,19 @@ public class SpeedTrackingService extends Service implements com.google.android.
     /**
      * Key to get the speed from extras
      */
-    public static final String EXTRA_SPEED = "com.dancing_koala.speedmeter.extra_speed";
+    public static final String EXTRA_SESSION_ID = "com.dancing_koala.speedmeter.SpeedTrackingService.extra_session_id";
+    /**
+     * Key to get the speed from extras
+     */
+    public static final String EXTRA_SPEED = "com.dancing_koala.speedmeter.SpeedTrackingService.extra_speed";
     /**
      * Action intent sent on to notify speed update
      */
-    public static final String INTENT_ACTION_SPEED_UPDATE = "com.dancing_koala.speedmeter.speed_update";
+    public static final String INTENT_ACTION_SPEED_UPDATE = "com.dancing_koala.speedmeter.SpeedTrackingService.speed_update";
     /**
      * Action intent sent on to notify that the device stopped moving
      */
-    public static final String INTENT_ACTION_STOP_MOVING = "com.dancing_koala.speedmeter.stop_moving";
+    public static final String INTENT_ACTION_STOP_MOVING = "com.dancing_koala.speedmeter.SpeedTrackingService.stop_moving";
 
     /**
      * Max accuracy delta in meters
@@ -106,8 +111,15 @@ public class SpeedTrackingService extends Service implements com.google.android.
 
         if (mGoogleApiClient.isConnected()) mGoogleApiClient.disconnect();
 
+        String sessionId = Tracker.getCurrentSessionId();
+
+        // Ending and saving the current tracking session
+        Tracker.finalizeSession();
+
         // Notifying all receivers about the service ending
-        sendBroadcast(new Intent(INTENT_ACTION_STOP_MOVING));
+        Intent stopIntent = new Intent(INTENT_ACTION_STOP_MOVING);
+        stopIntent.putExtra(EXTRA_SESSION_ID, sessionId);
+        sendBroadcast(stopIntent);
 
         super.onDestroy();
     }
@@ -207,9 +219,6 @@ public class SpeedTrackingService extends Service implements com.google.android.
     private void stopLocationUpdates() {
         // Stopping location updates
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
-
-        // Ending and saving the current tracking session
-        Tracker.finalizeSession();
     }
 
     /**

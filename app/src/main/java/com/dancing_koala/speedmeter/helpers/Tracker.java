@@ -108,6 +108,15 @@ public class Tracker {
     }
 
     /**
+     * Gets the id of the tracking session in progress
+     *
+     * @return The id of the current tracking session
+     */
+    public static String getCurrentSessionId() {
+        return (mSession == null) ? null : mSession.getId();
+    }
+
+    /**
      * Ends the tracking session in progress and saves it to the database
      */
     public static void finalizeSession() {

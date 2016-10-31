@@ -31,7 +31,7 @@
             android:name=".services.SpeedTrackingService"
             android:exported="false" />
 
-        <activity android:name=".ui.activities.RecapActivity"></activity>
+        <activity android:name=".ui.activities.SummaryActivity"></activity>
     </application>
 
 </manifest>

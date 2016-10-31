@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Détails de la session" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/txtv_session_start"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@+id/txtv_session_time_separator"
+            android:gravity="center"
+            android:text="13:20:35" />
+
+        <TextView
+            android:id="@+id/txtv_session_time_separator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="-" />
+
+        <TextView
+            android:id="@+id/txtv_session_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/txtv_session_time_separator"
+            android:gravity="center"
+            android:text="13:25:35" />
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/txtv_session_duration"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Durée totale" />
+
+    <TextView
+        android:id="@+id/txtv_session_distance"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Distance totale" />
+
+    <TextView
+        android:id="@+id/txtv_session_speed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Vitesse moyenne" />
+
+</LinearLayout>

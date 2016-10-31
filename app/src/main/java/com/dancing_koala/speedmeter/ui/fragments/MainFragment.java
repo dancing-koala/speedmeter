@@ -43,7 +43,16 @@ public class MainFragment extends Fragment {
      */
     private SpeedTrackingBroadcastReceiver receiver;
     private TextView speedTextView;
+    /**
+     * Root view of the fragment
+     */
     private View rootView;
+
+    /**
+     * Constructor
+     */
+    public MainFragment(){
+    }
 
     @Nullable
     @Override
