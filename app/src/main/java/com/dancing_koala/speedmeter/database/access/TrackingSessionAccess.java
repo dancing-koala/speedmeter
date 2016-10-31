@@ -47,9 +47,9 @@ public class TrackingSessionAccess extends DatabaseAccess {
     }
 
     /**
-     * Gets the last tracking session recorded
+     * Gets the tracking session with the given id
      *
-     * @return The last tracking session model
+     * @return The corresponding tracking session model
      */
     public TrackingSession getTrackingSessionById(String id) {
 

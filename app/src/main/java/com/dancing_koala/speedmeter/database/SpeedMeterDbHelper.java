@@ -57,16 +57,11 @@ public class SpeedMeterDbHelper extends SQLiteOpenHelper {
                 TrackingSessionEntry.COLUMN_NAME_AVERAGE_SPEED + TYPE_REAL +
                 " );";
 
-
-        Log.d("devel", "SpeedMeterDbHelper.getCreateEntriesSQL ::  " + sql);
-
         return sql;
     }
 
     public static String getDeleteEntriesSQL() {
         String sql = "DROP TABLE IF EXISTS " + TrackingSessionEntry.TABLE_NAME + ";";
-
-        Log.d("devel", "SpeedMeterDbHelper.getDeleteEntriesSQL ::  " + sql);
 
         return sql;
     }
