@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,12 +20,13 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.dancing_koala.speedmeter.R;
+import com.dancing_koala.speedmeter.helpers.Formatter;
 import com.dancing_koala.speedmeter.helpers.PermissionHelper;
 import com.dancing_koala.speedmeter.services.SpeedTrackingService;
 import com.dancing_koala.speedmeter.ui.activities.SummaryActivity;
 import com.dancing_koala.speedmeter.ui.views.SpeedMeterView;
 
-import java.util.Locale;
+import java.util.Objects;
 import java.util.Random;
 
 public class MainFragment extends Fragment {
@@ -35,11 +37,16 @@ public class MainFragment extends Fragment {
     public static final int LOCATION_PERMISSION_REQUEST_ID = 0x56;
 
     // Testing dedicated fields
-    private boolean mRunSpeedTest;
-    private Handler mTestHandler;
-    private Runnable mTestSpeedRunnable;
+    private TextView mProviderTxtView;
 
-
+    /**
+     * Button dedicated to tracking enabling and disabling
+     */
+    private FloatingActionButton mToggleTrackingBtn;
+    /**
+     * Simple object to be used as a tag
+     */
+    private Object mTagHolder;
     /**
      * Visual car-style speed indicator
      */
@@ -48,6 +55,9 @@ public class MainFragment extends Fragment {
      * Receiver dedicated to speed tracking (speed update and stop moving)
      */
     private SpeedTrackingBroadcastReceiver mReceiver;
+    /**
+     * Textual speed indicator
+     */
     private TextView mSpeedTextView;
     /**
      * Root view of the fragment
@@ -91,65 +101,33 @@ public class MainFragment extends Fragment {
      */
     private void init() {
 
-        mRunSpeedTest = false;
+        mTagHolder = new Object();
 
-        mTestHandler = new Handler();
+        mToggleTrackingBtn = (FloatingActionButton) mRootView.findViewById(R.id.fba_toggle_tracking);
 
-        mTestSpeedRunnable = new Runnable() {
-
-            Random rand = new Random();
-
-            @Override
-            public void run() {
-                if (mRunSpeedTest) {
-                    int speed = rand.nextInt(100);
-                    mSpeedTextView.setText("" + speed);
-                    mSpeedMeterView.setSpeed(speed);
-                    mTestHandler.postDelayed(this, 1000);
-                } else {
-                    mSpeedTextView.setText("Stop");
-                    mSpeedMeterView.setSpeed(0);
-                }
-            }
-        };
-
-        mRootView.findViewById(R.id.btn_start_speed_test).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!mRunSpeedTest) {
-                    mRunSpeedTest = true;
-                    mTestHandler.post(mTestSpeedRunnable);
-                }
-            }
-        });
-
-        mRootView.findViewById(R.id.btn_stop_speed_test).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mRunSpeedTest = false;
-            }
-        });
-
-        mRootView.findViewById(R.id.btn_start_tracking).setOnClickListener(new View.OnClickListener() {
+        mToggleTrackingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (PermissionHelper.hasLocationPermission(getActivity())) {
                     Intent serviceIntent = new Intent(getActivity().getApplicationContext(), SpeedTrackingService.class);
-                    getActivity().getApplicationContext().startService(serviceIntent);
+
+                    if (v.getTag() == null) {
+                        getActivity().getApplicationContext().startService(serviceIntent);
+                        mSpeedTextView.setText(R.string.enabling);
+                        v.setTag(mTagHolder);
+                        mToggleTrackingBtn.setImageResource(R.drawable.icon_stop);
+                    } else {
+                        getActivity().getApplicationContext().stopService(serviceIntent);
+                        v.setTag(null);
+                        mToggleTrackingBtn.setImageResource(R.drawable.icon_play);
+                    }
                 } else {
                     showLocationPermissionExplanation();
                 }
             }
         });
 
-        mRootView.findViewById(R.id.btn_stop_tracking).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent serviceIntent = new Intent(getActivity().getApplicationContext(), SpeedTrackingService.class);
-                getActivity().getApplicationContext().stopService(serviceIntent);
-            }
-        });
-
+        mProviderTxtView = (TextView) mRootView.findViewById(R.id.txtv_provider);
         mSpeedTextView = (TextView) mRootView.findViewById(R.id.txtv_speed);
         mSpeedMeterView = (SpeedMeterView) mRootView.findViewById(R.id.smv_speedmeterview);
         mReceiver = new SpeedTrackingBroadcastReceiver();
@@ -182,7 +160,9 @@ public class MainFragment extends Fragment {
 
             Intent serviceIntent = new Intent(getActivity().getApplicationContext(), SpeedTrackingService.class);
             getActivity().getApplicationContext().startService(serviceIntent);
-
+            mSpeedTextView.setText(R.string.enabling);
+            mToggleTrackingBtn.setTag(mTagHolder);
+            mToggleTrackingBtn.setImageResource(R.drawable.icon_stop);
         }
     }
 
@@ -193,22 +173,23 @@ public class MainFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            Log.d("devel", "SpeedTrackingBroadcastReceiver.onReceive ::  " + action);
+
+            mProviderTxtView.setText(intent.getStringExtra(SpeedTrackingService.EXTRA_PROVIDER));
 
             switch (action) {
                 case SpeedTrackingService.INTENT_ACTION_SPEED_UPDATE:
-                    float speed = intent.getFloatExtra(SpeedTrackingService.EXTRA_SPEED, 0f) * 3600 / 1000;
-                    mSpeedTextView.setText(String.format(Locale.FRANCE, "%.01f", speed));
-                    mSpeedMeterView.setSpeed(speed);
+                    float speed = intent.getFloatExtra(SpeedTrackingService.EXTRA_SPEED, 0f);
+                    mSpeedTextView.setText(Formatter.getKilometersPerHour(speed));
+                    mSpeedMeterView.setSpeed(speed * 3600 / 1000);
                     break;
 
                 case SpeedTrackingService.INTENT_ACTION_STOP_MOVING:
-                    mSpeedTextView.setText("Stop");
+                    mSpeedTextView.setText(R.string.stop);
                     mSpeedMeterView.setSpeed(0f);
 
                     Intent summmaryIntent = new Intent(getActivity(), SummaryActivity.class);
                     summmaryIntent.putExtra(SummaryActivity.EXTRA_SESSION_ID, intent.getStringExtra(SpeedTrackingService.EXTRA_SESSION_ID));
-//                    startActivity(summmaryIntent);
+                    startActivity(summmaryIntent);
                     break;
             }
         }

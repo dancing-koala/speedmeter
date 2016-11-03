@@ -1,5 +1,21 @@
 <resources>
-    <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
+    <!-- MARGES DE L'APPLICATION -->
+    <dimen name="app_margin_xsmall">4dp</dimen>
+    <dimen name="app_margin_small">8dp</dimen>
+    <dimen name="app_margin_mid">12dp</dimen>
+    <dimen name="app_margin">16dp</dimen>
+    <dimen name="app_margin_big">24dp</dimen>
+    <dimen name="app_margin_xbig">32dp</dimen>
+    <dimen name="app_margin_xxbig">36dp</dimen>
+
+    <!-- TAILLES DE TEXTE DE L'APPLICATION -->
+    <dimen name="app_text_size_xxbig">28sp</dimen>
+    <dimen name="app_text_size_xbig">24sp</dimen>
+    <dimen name="app_text_size_big">20sp</dimen>
+    <dimen name="app_text_size_xmid">18sp</dimen>
+    <dimen name="app_text_size_mid">16sp</dimen>
+    <dimen name="app_text_size_small">14sp</dimen>
+    <dimen name="app_text_size_xsmall">12sp</dimen>
+
+    <dimen name="speed_meter_size">300dp</dimen>
 </resources>

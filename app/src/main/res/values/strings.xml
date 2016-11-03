@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">SpeedMeter</string>
 
+    <string name="enabling">Activation…</string>
+    <string name="stop">Stop</string>
+    <string name="time_separator">-</string>
     <string name="understood">J\'ai compris</string>
 
     <string name="location_explanation_title">Permission de localisation</string>

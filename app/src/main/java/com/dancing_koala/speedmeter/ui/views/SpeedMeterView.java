@@ -22,7 +22,7 @@ public class SpeedMeterView extends View {
     private static final int DEFAULT_BG_COLOR = Color.parseColor("#252525");
     private static final int DEFAULT_NEEDLE_COLOR = Color.parseColor("#FF8800");
 
-    private static final float DEFAULT_MAX_SPEED = 180f;
+    private static final float DEFAULT_MAX_SPEED = 150f;
     private static final float DEFAULT_INITIAL_ANGLE = -45f;
     private static final float DEFAULT_MAX_ROTATION_ANGLE = 270f;
 
@@ -64,7 +64,7 @@ public class SpeedMeterView extends View {
 
     private void init(Context context) {
         mNeedlePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mNeedlePaint.setStyle(Paint.Style.STROKE);
+        mNeedlePaint.setStyle(Paint.Style.FILL_AND_STROKE);
         mNeedlePaint.setStrokeWidth(4);
         mNeedlePaint.setColor(DEFAULT_NEEDLE_COLOR);
 
@@ -95,13 +95,13 @@ public class SpeedMeterView extends View {
 
             mNeedlePath.reset();
             mNeedlePath.moveTo(mCenterX, mCenterY);
-            mNeedlePath.lineTo(mCenterX - mRadius, mCenterY);
+            mNeedlePath.lineTo(mCenterX - (mRadius * 0.9f), mCenterY);
 
             mMatrix.setRotate(DEFAULT_INITIAL_ANGLE, mCenterX, mCenterY);
             mNeedlePath.transform(mMatrix);
-
-            setMeasuredDimension(mWidth, mHeight);
         }
+
+        setMeasuredDimension(mWidth, mHeight);
     }
 
     @Override
@@ -112,10 +112,10 @@ public class SpeedMeterView extends View {
 
             mBgPaint.setColor(DEFAULT_OUTER_RING_COLOR);
             mCacheCanvas.drawCircle(mCenterX, mCenterY, mRadius, mBgPaint);
+
             mBgPaint.setColor(DEFAULT_BG_COLOR);
             mCacheCanvas.drawCircle(mCenterX, mCenterY, mRadius - 12, mBgPaint);
 
-            mNeedlePaint.setStyle(Paint.Style.STROKE);
             mCacheCanvas.drawCircle(mCenterX, mCenterY, 10, mNeedlePaint);
         }
 
@@ -124,7 +124,12 @@ public class SpeedMeterView extends View {
         canvas.drawPath(mNeedlePath, mNeedlePaint);
     }
 
+    /**
+     * Sets the current speed and animates the needle
+     * @param speed Speed to be set
+     */
     public void setSpeed(float speed) {
+        // The speed value should not go over the DEFAULT_MAX_SPEED
         mSpeed = (speed > DEFAULT_MAX_SPEED) ? DEFAULT_MAX_SPEED : speed;
 
         final float rotation = (mSpeed * DEFAULT_MAX_ROTATION_ANGLE / DEFAULT_MAX_SPEED) - mCurrentAngle;

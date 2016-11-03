@@ -25,6 +25,10 @@ public class SpeedTrackingService extends Service implements com.google.android.
     /**
      * Key to get the speed from extras
      */
+    public static final String EXTRA_PROVIDER = "com.dancing_koala.speedmeter.SpeedTrackingService.extra_provider";
+    /**
+     * Key to get the speed from extras
+     */
     public static final String EXTRA_SESSION_ID = "com.dancing_koala.speedmeter.SpeedTrackingService.extra_session_id";
     /**
      * Key to get the speed from extras
@@ -56,10 +60,15 @@ public class SpeedTrackingService extends Service implements com.google.android.
      */
     private static final int TIME_INTERVAL_BASE = 1000 * 3;// 3 seconds
     /**
-     * Max time delta between location updates.
+     * Maximum time delta between location updates.
      * Larger time delta means the update is too old.
      */
     private static final int TIME_DELTA_MAX = 1000 * 60 * 2;// 2 minutes
+    /**
+     * Minimum time delta between location updates.
+     * Smaller time delta means the update is too recent.
+     */
+    private static final int TIME_DELTA_MIN = 600;// 600 millisecondes
 
     /**
      * Determines whether the trip started or not
@@ -155,7 +164,8 @@ public class SpeedTrackingService extends Service implements com.google.android.
         Log.d("devel", "SpeedTrackingService.onLocationChanged ::  ");
         if (isBetterLocation(location, lastLocation)) {
             if (lastLocation != null) {
-                float speed = calculateSpeed(lastLocation, location);
+//                float speed = calculateSpeed(lastLocation, location);
+                float speed = location.getSpeed();
 
                 Tracker.addDistance(location.distanceTo(lastLocation));
                 Tracker.addSpeed(speed);
@@ -179,6 +189,7 @@ public class SpeedTrackingService extends Service implements com.google.android.
                 // Notify receivers about speed updates
                 Intent speedUpdateIntent = new Intent(INTENT_ACTION_SPEED_UPDATE);
                 speedUpdateIntent.putExtra(EXTRA_SPEED, speed);
+                speedUpdateIntent.putExtra(EXTRA_PROVIDER, location.getProvider() + " " + Math.round(location.getSpeed()));
                 sendBroadcast(speedUpdateIntent);
             }
 
@@ -235,13 +246,13 @@ public class SpeedTrackingService extends Service implements com.google.android.
         long timeDelta = location.getTime() - currentBestLocation.getTime();
 
         // Determining the time delta based conditions
+        boolean isTooOldOrTooRecent = timeDelta < -TIME_DELTA_MAX || timeDelta < TIME_DELTA_MIN;
         boolean isNewerEnough = timeDelta > TIME_DELTA_MAX;
-        boolean isTooOld = timeDelta < -TIME_DELTA_MAX;
         boolean isNewer = timeDelta > 0;
 
         if (isNewerEnough) {
             return true;
-        } else if (isTooOld) {
+        } else if (isTooOldOrTooRecent) {
             return false;
         }
 
