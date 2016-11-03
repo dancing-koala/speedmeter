@@ -18,4 +18,9 @@
         récupérées par le GPS de votre appareil. C\'est pourquoi vous devez autoriser l\'application
         à utiliser le GPS.
     </string>
+
+    <string name="gps_mandatory_title">Activation GPS</string>
+    <string name="gps_mandatory_msg">
+        Vous devez activer votre GPS pour pouvoir utiliser cette fonction.
+    </string>
 </resources>

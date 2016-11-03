@@ -19,6 +19,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+/**
+ * Service dedicated to navigation related data retrieving and calculation
+ */
 public class SpeedTrackingService extends Service implements com.google.android.gms.location.LocationListener,
         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -162,7 +165,6 @@ public class SpeedTrackingService extends Service implements com.google.android.
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.d("devel", "SpeedTrackingService.onLocationChanged ::  ");
         if (isBetterLocation(location, lastLocation)) {
             if (lastLocation != null) {
 //                float speed = calculateSpeed(lastLocation, location);

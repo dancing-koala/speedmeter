@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -38,6 +39,10 @@ public class MonitoringFragment extends Fragment {
      * Button dedicated to tracking enabling and disabling
      */
     private FloatingActionButton mToggleTrackingBtn;
+    /**
+     * Location manager service
+     */
+    private LocationManager mLocationManager;
     /**
      * Simple object to be used as a tag
      */
@@ -96,6 +101,8 @@ public class MonitoringFragment extends Fragment {
      */
     private void init() {
 
+        mLocationManager = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+
         mTagHolder = new Object();
 
         mToggleTrackingBtn = (FloatingActionButton) mRootView.findViewById(R.id.fba_toggle_tracking);
@@ -103,17 +110,22 @@ public class MonitoringFragment extends Fragment {
         mToggleTrackingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 if (PermissionHelper.hasLocationPermission(getActivity())) {
-                    Intent serviceIntent = new Intent(getActivity().getApplicationContext(), SpeedTrackingService.class);
-                    if (v.getTag() == null) {
-                        getActivity().getApplicationContext().startService(serviceIntent);
-                        mSpeedTextView.setText(R.string.enabling);
-                        v.setTag(mTagHolder);
-                        mToggleTrackingBtn.setImageResource(R.drawable.icon_stop);
+                    if (isGPSEnabled()) {
+                        Intent serviceIntent = new Intent(getActivity().getApplicationContext(), SpeedTrackingService.class);
+                        if (v.getTag() == null) {
+                            getActivity().getApplicationContext().startService(serviceIntent);
+                            mSpeedTextView.setText(R.string.enabling);
+                            v.setTag(mTagHolder);
+                            mToggleTrackingBtn.setImageResource(R.drawable.icon_stop);
+                        } else {
+                            getActivity().getApplicationContext().stopService(serviceIntent);
+                            v.setTag(null);
+                            mToggleTrackingBtn.setImageResource(R.drawable.icon_play);
+                        }
                     } else {
-                        getActivity().getApplicationContext().stopService(serviceIntent);
-                        v.setTag(null);
-                        mToggleTrackingBtn.setImageResource(R.drawable.icon_play);
+                        showGPSMandatoryAlert();
                     }
                 } else {
                     showLocationPermissionExplanation();
@@ -144,18 +156,48 @@ public class MonitoringFragment extends Fragment {
                 .show();
     }
 
+    /**
+     * Shows an alert dialog telling the user that the GPS needs to be enabled
+     */
+    private void showGPSMandatoryAlert() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+        builder.setTitle(R.string.gps_mandatory_title)
+                .setMessage(R.string.gps_mandatory_msg)
+                .setNeutralButton(R.string.understood, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .show();
+    }
+
+    /**
+     * Checks whether the GPS provider is enabled or not
+     *
+     * @return True if the GPS provider is enabled
+     */
+    private boolean isGPSEnabled() {
+        return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == LOCATION_PERMISSION_REQUEST_ID
                 && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-            // The location permission was granted so we can start the tracking service
-            Intent serviceIntent = new Intent(getActivity().getApplicationContext(), SpeedTrackingService.class);
-            getActivity().getApplicationContext().startService(serviceIntent);
-            mSpeedTextView.setText(R.string.enabling);
-            mToggleTrackingBtn.setTag(mTagHolder);
-            mToggleTrackingBtn.setImageResource(R.drawable.icon_stop);
+            if (isGPSEnabled()) {
+                // The location permission was granted so we can start the tracking service
+                Intent serviceIntent = new Intent(getActivity().getApplicationContext(), SpeedTrackingService.class);
+                getActivity().getApplicationContext().startService(serviceIntent);
+                mSpeedTextView.setText(R.string.enabling);
+                mToggleTrackingBtn.setTag(mTagHolder);
+                mToggleTrackingBtn.setImageResource(R.drawable.icon_stop);
+            } else {
+                showGPSMandatoryAlert();
+            }
         }
     }
 
