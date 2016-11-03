@@ -11,7 +11,7 @@ import com.dancing_koala.speedmeter.R;
 import com.tsengvn.typekit.TypekitContextWrapper;
 
 /**
- * Base activity to use Typekit
+ * Base activity
  */
 public class BaseActivity extends AppCompatActivity {
 

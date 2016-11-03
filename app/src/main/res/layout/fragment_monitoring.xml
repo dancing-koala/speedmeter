@@ -3,17 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="@dimen/app_margin"
-    android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/txtv_provider"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:background="#88ffffff"
-        android:padding="@dimen/app_margin_xsmall" />
+    android:layout_margin="@dimen/app_margin">
 
     <com.dancing_koala.speedmeter.ui.views.SpeedMeterView
         android:id="@+id/smv_speedmeterview"
@@ -41,6 +31,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
+        android:layout_centerHorizontal="true"
         android:src="@drawable/icon_play" />
 </RelativeLayout>

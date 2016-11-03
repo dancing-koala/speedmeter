@@ -24,6 +24,7 @@ public class SummaryActivity extends BaseActivity {
 
         ActionBar actionBar = getSupportActionBar();
 
+        // We set the title of the window and add the close icon
         actionBar.setTitle(R.string.summary_title);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_clear);
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -37,7 +38,8 @@ public class SummaryActivity extends BaseActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            onBackPressed();
+            // If the close icon is pressed, we close the activity
+            finish();
             return true;
         } else {
             return super.onOptionsItemSelected(item);

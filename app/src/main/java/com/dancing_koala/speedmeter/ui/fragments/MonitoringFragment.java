@@ -8,12 +8,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,18 +24,15 @@ import com.dancing_koala.speedmeter.services.SpeedTrackingService;
 import com.dancing_koala.speedmeter.ui.activities.SummaryActivity;
 import com.dancing_koala.speedmeter.ui.views.SpeedMeterView;
 
-import java.util.Objects;
-import java.util.Random;
-
-public class MainFragment extends Fragment {
+/**
+ * Fragment dedicated to instant speed monitoring
+ */
+public class MonitoringFragment extends Fragment {
 
     /**
      * ID used when requesting location permission
      */
     public static final int LOCATION_PERMISSION_REQUEST_ID = 0x56;
-
-    // Testing dedicated fields
-    private TextView mProviderTxtView;
 
     /**
      * Button dedicated to tracking enabling and disabling
@@ -67,13 +62,13 @@ public class MainFragment extends Fragment {
     /**
      * Constructor
      */
-    public MainFragment() {
+    public MonitoringFragment() {
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        mRootView = inflater.inflate(R.layout.fragment_main, container, false);
+        mRootView = inflater.inflate(R.layout.fragment_monitoring, container, false);
         init();
         return mRootView;
     }
@@ -126,7 +121,6 @@ public class MainFragment extends Fragment {
             }
         });
 
-        mProviderTxtView = (TextView) mRootView.findViewById(R.id.txtv_provider);
         mSpeedTextView = (TextView) mRootView.findViewById(R.id.txtv_speed);
         mSpeedMeterView = (SpeedMeterView) mRootView.findViewById(R.id.smv_speedmeterview);
         mReceiver = new SpeedTrackingBroadcastReceiver();
@@ -139,8 +133,7 @@ public class MainFragment extends Fragment {
     private void showLocationPermissionExplanation() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        builder
-                .setTitle(R.string.location_explanation_title)
+        builder.setTitle(R.string.location_explanation_title)
                 .setMessage(R.string.location_explanation_msg)
                 .setNeutralButton(R.string.understood, new DialogInterface.OnClickListener() {
                     @Override
@@ -157,6 +150,7 @@ public class MainFragment extends Fragment {
                 && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
+            // The location permission was granted so we can start the tracking service
             Intent serviceIntent = new Intent(getActivity().getApplicationContext(), SpeedTrackingService.class);
             getActivity().getApplicationContext().startService(serviceIntent);
             mSpeedTextView.setText(R.string.enabling);
@@ -173,19 +167,26 @@ public class MainFragment extends Fragment {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
 
-            mProviderTxtView.setText(intent.getStringExtra(SpeedTrackingService.EXTRA_PROVIDER));
-
             switch (action) {
                 case SpeedTrackingService.INTENT_ACTION_SPEED_UPDATE:
+                    // We update the textual and the graphical speed indicators
                     float speed = intent.getFloatExtra(SpeedTrackingService.EXTRA_SPEED, 0f);
                     mSpeedTextView.setText(Formatter.getKilometersPerHour(speed));
-                    mSpeedMeterView.setSpeed(speed * 3600 / 1000);
+                    mSpeedMeterView.updateSpeed(speed * 3600 / 1000);
                     break;
 
                 case SpeedTrackingService.INTENT_ACTION_STOP_MOVING:
+                    // We reset the speed indicators
                     mSpeedTextView.setText(R.string.stop);
-                    mSpeedMeterView.setSpeed(0f);
+                    mSpeedMeterView.updateSpeed(0f);
 
+                    // If the toggle button has not been changed, we reset it too
+                    if (mToggleTrackingBtn.getTag() != null) {
+                        mToggleTrackingBtn.setTag(null);
+                        mToggleTrackingBtn.setImageResource(R.drawable.icon_play);
+                    }
+
+                    // We show the summary of the last session
                     Intent summmaryIntent = new Intent(getActivity(), SummaryActivity.class);
                     summmaryIntent.putExtra(SummaryActivity.EXTRA_SESSION_ID, intent.getStringExtra(SpeedTrackingService.EXTRA_SESSION_ID));
                     startActivity(summmaryIntent);
