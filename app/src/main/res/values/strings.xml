@@ -6,6 +6,12 @@
     <string name="time_separator">-</string>
     <string name="understood">J\'ai compris</string>
 
+    <string name="summary_title">Détails de la session</string>
+    <string name="summary_section_title_times">Heures de début - fin</string>
+    <string name="summary_section_title_duration">Durée totale</string>
+    <string name="summary_section_title_distance">Distance totale</string>
+    <string name="summary_section_title_speed">Vitesse moyenne</string>
+
     <string name="location_explanation_title">Permission de localisation</string>
     <string name="location_explanation_msg">
         Tous les calculs de vitesse effectués par l\'application se basent sur les données

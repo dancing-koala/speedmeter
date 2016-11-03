@@ -110,7 +110,6 @@ public class MainFragment extends Fragment {
             public void onClick(View v) {
                 if (PermissionHelper.hasLocationPermission(getActivity())) {
                     Intent serviceIntent = new Intent(getActivity().getApplicationContext(), SpeedTrackingService.class);
-
                     if (v.getTag() == null) {
                         getActivity().getApplicationContext().startService(serviceIntent);
                         mSpeedTextView.setText(R.string.enabling);

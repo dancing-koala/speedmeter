@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="@dimen/app_margin"
     android:background="@color/colorPrimaryDark"
     android:orientation="vertical">
 
@@ -10,7 +11,7 @@
 
         <TextView
             style="@style/AppTheme.Summary.Section.Title"
-            android:text="Début - Fin" />
+            android:text="@string/summary_section_title_times" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -46,7 +47,7 @@
 
         <TextView
             style="@style/AppTheme.Summary.Section.Title"
-            android:text="Durée totale" />
+            android:text="@string/summary_section_title_duration" />
 
         <TextView
             android:id="@+id/txtv_session_duration"
@@ -59,7 +60,7 @@
 
         <TextView
             style="@style/AppTheme.Summary.Section.Title"
-            android:text="Distance totale" />
+            android:text="@string/summary_section_title_distance" />
 
         <TextView
             android:id="@+id/txtv_session_distance"
@@ -71,7 +72,7 @@
 
         <TextView
             style="@style/AppTheme.Summary.Section.Title"
-            android:text="Vitesse moyenne" />
+            android:text="@string/summary_section_title_speed" />
 
         <TextView
             android:id="@+id/txtv_session_speed"

@@ -123,7 +123,8 @@ public class SpeedTrackingService extends Service implements com.google.android.
         String sessionId = Tracker.getCurrentSessionId();
 
         // Ending and saving the current tracking session
-        Tracker.finalizeSession();
+        if (Tracker.isInitialized())
+            Tracker.finalizeSession();
 
         // Notifying all receivers about the service ending
         Intent stopIntent = new Intent(INTENT_ACTION_STOP_MOVING);
